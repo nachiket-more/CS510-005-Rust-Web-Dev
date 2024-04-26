@@ -1026,6 +1026,7 @@ dependencies = [
  "axum",
  "cargo-watch",
  "chrono",
+ "lazy_static",
  "serde",
  "serde_json",
  "tokio",
