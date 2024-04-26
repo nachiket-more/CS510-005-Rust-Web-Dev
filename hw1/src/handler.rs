@@ -13,3 +13,4 @@ pub async fn health_checker_handler() -> impl IntoResponse {
 
     Json(json_response)
 }
+
