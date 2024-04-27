@@ -1,5 +1,3 @@
-//! # Simple CRUD API in Rust using Axum
-//!
 //! This is the entry point of the application, which sets up the server and starts the Axum application.
 
 mod database;
@@ -8,8 +6,6 @@ mod routes;
 
 use routes::create_router;
 
-/// Starts the server and listens for incoming requests.
-///
 /// This function is marked as `#[tokio::main]` to enable async execution using the Tokio runtime.
 #[tokio::main]
 async fn main() {
