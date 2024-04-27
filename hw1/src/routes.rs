@@ -1,20 +1,30 @@
-// routes.rs
+//! This module defines the routes for the CRUD API and maps them to the corresponding handler functions.
+// Importing necessary modules and items from the Axum framework
 use axum::{
     routing::{delete, get, patch, post},
     Router,
 };
 
+// Importing necessary items from other modules in the crate
 use crate::{
     database,
     handler::{
-        delete_question_handler, get_question_by_id_handler, get_questions_handler,
-        health_checker_handler, insert_question_handler, update_question_handler,
+        // Importing handler module and its functions
+        delete_question_handler,
+        get_question_by_id_handler,
+        get_questions_handler,
+        health_checker_handler,
+        insert_question_handler,
+        update_question_handler,
     },
 };
 
+/// Creates the router and defines the routes for the CRUD API.
+/// This function sets up the routes and maps them to the corresponding handler functions.
 pub fn create_router() -> Router {
+    // Seeding the database with initial data
     database::seed_database();
-
+    // Creating a new router and defining routes
     Router::new()
         .route("/", get(health_checker_handler))
         .route("/questions", get(get_questions_handler))
