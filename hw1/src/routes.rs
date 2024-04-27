@@ -8,7 +8,7 @@ use crate::{
     database,
     handler::{
         delete_question_handler, get_question_by_id_handler, get_questions_handler,
-        health_checker_handler, insert_question_handler,
+        health_checker_handler, insert_question_handler, update_question_handler,
     },
 };
 
@@ -21,5 +21,5 @@ pub fn create_router() -> Router {
         .route("/question/:id", get(get_question_by_id_handler))
         .route("/question", post(insert_question_handler))
         .route("/question/:id", delete(delete_question_handler))
-    // .route("/question/:id", patch(update_question_handler))
+        .route("/question/:id", patch(update_question_handler))
 }

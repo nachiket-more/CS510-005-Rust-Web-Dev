@@ -109,3 +109,54 @@ pub async fn delete_question_handler(Path(id): Path<String>) -> impl IntoRespons
         }
     }
 }
+
+pub async fn update_question_handler(
+    Path(id): Path<String>,
+    Json(payload): Json<Value>,
+) -> impl IntoResponse {
+    let mut db = crate::database::DATABASE.write().unwrap();
+
+    // Find the index of the question with the given ID
+    let question_index = db.iter().position(|item| item.id == id);
+
+    match question_index {
+        Some(index) => {
+            // Create a new question with the updated fields
+            let mut updated_question = db[index].clone();
+
+            // Update the fields based on the payload
+            if let Some(title) = payload.get("title") {
+                updated_question.title = title.as_str().unwrap().to_string();
+            }
+            if let Some(content) = payload.get("content") {
+                updated_question.content = content.as_str().unwrap().to_string();
+            }
+            if let Some(tags) = payload.get("tags") {
+                updated_question.tags = tags
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|tag| tag.as_str().unwrap().to_string())
+                    .collect();
+            }
+
+            // Replace the original question with the updated question
+            db[index] = updated_question;
+
+            // Create a new instance of the updated question for the JSON response
+            let updated_question_response = db[index].clone();
+
+            let json_response = serde_json::json!({
+                "message": "Question updated successfully",
+                "updated_question": updated_question_response
+            });
+            Ok(Json(json_response))
+        }
+        None => {
+            let json_response = serde_json::json!({
+                "error": "Question not found"
+            });
+            Err((StatusCode::NOT_FOUND, Json(json_response)))
+        }
+    }
+}

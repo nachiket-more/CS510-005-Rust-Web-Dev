@@ -1,0 +1,14 @@
+[
+    {
+      "id": "1",
+      "title": "How?",
+      "content": "Please help!",
+      "tags": ["general"]
+    },
+    {
+      "id": "2",
+      "title": "Why is the sky blue?",
+      "content": "I've always wondered about the reason behind the color of the sky.",
+      "tags": ["science", "nature"]
+    }
+]

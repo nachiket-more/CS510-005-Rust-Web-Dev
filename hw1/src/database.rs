@@ -1,5 +1,6 @@
 use lazy_static::lazy_static;
 use std::sync::RwLock;
+use std::fs;
 
 pub mod models {
     // Make the Question struct public here
@@ -17,18 +18,9 @@ lazy_static! {
 }
 
 pub fn seed_database() {
-    let mut db = DATABASE.write().unwrap();
-    db.push(models::Question {
-        id: "1".to_string(),
-        title: "How?".to_string(),
-        content: "Please help!".to_string(),
-        tags: vec!["general".to_string()],
-    });
+    let questions_json = fs::read_to_string("questions.json").expect("Failed to read questions.json");
+    let questions: Vec<models::Question> = serde_json::from_str(&questions_json).expect("Failed to deserialize questions");
 
-    db.push(models::Question {
-        id: "2".to_string(),
-        title: "Second Question".to_string(),
-        content: "I've always wondered about the reason behind the color of the sky.".to_string(),
-        tags: vec!["science".to_string()],
-    });
+    let mut db = DATABASE.write().unwrap();
+    db.extend(questions);
 }
