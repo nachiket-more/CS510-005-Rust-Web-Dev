@@ -1,6 +1,5 @@
-use std::sync::RwLock;
 use lazy_static::lazy_static;
-
+use std::sync::RwLock;
 
 pub mod models {
     // Make the Question struct public here
@@ -12,7 +11,6 @@ pub mod models {
         pub tags: Vec<String>,
     }
 }
-
 
 lazy_static! {
     pub static ref DATABASE: RwLock<Vec<models::Question>> = RwLock::new(Vec::new());
@@ -26,7 +24,7 @@ pub fn seed_database() {
         content: "Please help!".to_string(),
         tags: vec!["general".to_string()],
     });
-    
+
     db.push(models::Question {
         id: "2".to_string(),
         title: "Second Question".to_string(),

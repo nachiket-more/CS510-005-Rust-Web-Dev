@@ -1,6 +1,6 @@
-mod routes;
-mod handler;
 mod database;
+mod handler;
+mod routes;
 
 use routes::create_router;
 

@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, Json},
+    extract::{Json, Path},
     http::StatusCode,
     response::IntoResponse,
 };
@@ -35,15 +35,14 @@ pub async fn get_question_by_id_handler(Path(id): Path<String>) -> impl IntoResp
     }
 }
 
-
 pub async fn insert_question_handler(Json(payload): Json<Value>) -> impl IntoResponse {
     let mut db = crate::database::DATABASE.write().unwrap();
 
     // Check if the payload contains the required fields
-    if payload.get("id").is_none() || 
-       payload.get("title").is_none() || 
-       payload.get("content").is_none() || 
-       payload.get("tags").is_none() 
+    if payload.get("id").is_none()
+        || payload.get("title").is_none()
+        || payload.get("content").is_none()
+        || payload.get("tags").is_none()
     {
         let json_response = serde_json::json!({
             "error": "Invalid payload. Required fields: id, question, answer"
@@ -84,4 +83,29 @@ pub async fn insert_question_handler(Json(payload): Json<Value>) -> impl IntoRes
         "message": "Question created successfully"
     });
     Ok(Json(json_response))
+}
+
+pub async fn delete_question_handler(Path(id): Path<String>) -> impl IntoResponse {
+    let mut db = crate::database::DATABASE.write().unwrap();
+
+    // Find the index of the question with the given ID
+    let id = db.iter().position(|item| item.id == id);
+
+    match id {
+        Some(id) => {
+            // Remove the question from the database
+            db.remove(id);
+
+            let json_response = serde_json::json!({
+                "message": "Question deleted successfully"
+            });
+            Ok(Json(json_response))
+        }
+        None => {
+            let json_response = serde_json::json!({
+                "error": "Question not found"
+            });
+            Err((StatusCode::NOT_FOUND, Json(json_response)))
+        }
+    }
 }

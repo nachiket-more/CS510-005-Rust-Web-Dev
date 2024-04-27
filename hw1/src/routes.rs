@@ -1,13 +1,15 @@
 // routes.rs
 use axum::{
-    routing::{get, post},
+    routing::{delete, get, patch, post},
     Router,
 };
 
 use crate::{
-    handler::{health_checker_handler, get_questions_handler, 
-        get_question_by_id_handler, insert_question_handler},
     database,
+    handler::{
+        delete_question_handler, get_question_by_id_handler, get_questions_handler,
+        health_checker_handler, insert_question_handler,
+    },
 };
 
 pub fn create_router() -> Router {
@@ -18,7 +20,6 @@ pub fn create_router() -> Router {
         .route("/questions", get(get_questions_handler))
         .route("/question/:id", get(get_question_by_id_handler))
         .route("/question", post(insert_question_handler))
-        // .route("question/:id",.patch(delete_question_handler))
-        // .route("question/:id",.delete(update_question_handler))
+        .route("/question/:id", delete(delete_question_handler))
+    // .route("/question/:id", patch(update_question_handler))
 }
-
