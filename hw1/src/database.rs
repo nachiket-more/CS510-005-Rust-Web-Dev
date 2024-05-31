@@ -1,4 +1,4 @@
-use sqlx::{PgPool, Postgres, Pool};
+use sqlx::{PgPool, Pool, Postgres};
 use std::env;
 
 pub mod models {
@@ -7,7 +7,7 @@ pub mod models {
 
     #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
     pub struct Question {
-        pub id: String, 
+        pub id: i32,
         pub title: String,
         pub content: String,
         pub tags: Vec<String>,
@@ -16,5 +16,7 @@ pub mod models {
 
 pub async fn connect() -> Pool<Postgres> {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgPool::connect(&database_url).await.expect("Failed to connect to the database")
+    PgPool::connect(&database_url)
+        .await
+        .expect("Failed to connect to the database")
 }

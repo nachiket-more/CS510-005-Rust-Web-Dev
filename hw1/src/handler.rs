@@ -4,8 +4,8 @@ use axum::{
     response::IntoResponse,
 };
 // use serde_json::Value;
-use serde_json;
 use crate::database::models::Question;
+use serde_json::Value;
 use sqlx::PgPool;
 use std::sync::Arc;
 
@@ -18,7 +18,6 @@ pub async fn health_checker_handler() -> impl IntoResponse {
     }))
 }
 
-
 /// Get all questions handler.
 /// This function retrieves all questions from the database and returns them as a JSON response.
 // pub async fn get_questions_handler() -> impl IntoResponse {
@@ -27,9 +26,7 @@ pub async fn health_checker_handler() -> impl IntoResponse {
 //     // Return the entire database as a JSON response
 //     Json(db.clone())
 // }
-pub async fn get_questions_handler(
-    State(pool): State<Arc<PgPool>>,
-) -> impl IntoResponse {
+pub async fn get_questions_handler(State(pool): State<Arc<PgPool>>) -> impl IntoResponse {
     // Query to get all questions
     let questions = sqlx::query_as::<_, Question>("SELECT * FROM questions ORDER BY id ASC ")
         .fetch_all(&*pool)
@@ -39,7 +36,6 @@ pub async fn get_questions_handler(
     // Return the entire database as a JSON response
     Json(questions)
 }
-
 
 /// Get a question by ID handler.
 /// This function finds a question by its ID and returns it as a JSON response.
@@ -61,7 +57,7 @@ pub async fn get_questions_handler(
 // }
 pub async fn get_question_by_id_handler(
     State(pool): State<Arc<PgPool>>,
-    Path(id): Path<String>,
+    Path(id): Path<i32>,
 ) -> impl IntoResponse {
     let result = sqlx::query_as::<_, Question>("SELECT * FROM questions WHERE id = $1")
         .bind(id)
@@ -70,11 +66,18 @@ pub async fn get_question_by_id_handler(
 
     match result {
         Ok(Some(question)) => Json(question).into_response(),
-        Ok(None) => (StatusCode::NOT_FOUND, Json(serde_json::json!({"error": "Question not found"}))).into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": "Failed to fetch question"}))).into_response(),
+        Ok(None) => (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Question not found"})),
+        )
+            .into_response(),
+        Err(_) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": "Failed to fetch question"})),
+        )
+            .into_response(),
     }
 }
-
 
 // /// Insert a new question handler.
 // /// This function creates a new question based on the provided payload and adds it to the database.
@@ -124,6 +127,48 @@ pub async fn get_question_by_id_handler(
 //     });
 //     Ok(Json(json_response))
 // }
+pub async fn insert_question_handler(
+    State(pool): State<Arc<PgPool>>,
+    Json(payload): Json<Value>,
+) -> impl IntoResponse {
+    // Check if the payload contains the required fields
+    if let (Some(title), Some(content), Some(tags)) = (
+        payload.get("title").and_then(|v| v.as_str()),
+        payload.get("content").and_then(|v| v.as_str()),
+        payload.get("tags").and_then(|v| v.as_array()),
+    ) {
+        let tags: Vec<String> = tags
+            .iter()
+            .filter_map(|tag| tag.as_str().map(String::from))
+            .collect();
+
+        let result = sqlx::query!(
+            "INSERT INTO questions (title, content, tags) VALUES ($1, $2, $3)",
+            title,
+            content,
+            &tags
+        )
+        .execute(&*pool)
+        .await;
+
+        match result {
+            Ok(_) => {
+                let json_response =
+                    serde_json::json!({ "message": "Question created successfully" });
+                (StatusCode::CREATED, Json(json_response))
+            }
+            Err(_) => {
+                let json_response = serde_json::json!({ "error": "Failed to create question" });
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(json_response))
+            }
+        }
+    } else {
+        let json_response = serde_json::json!({
+            "error": "Invalid payload. Required fields: title, content, tags"
+        });
+        (StatusCode::BAD_REQUEST, Json(json_response))
+    }
+}
 
 // /// Delete a question handler.
 // /// This function deletes a question from the database by its ID.

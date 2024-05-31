@@ -4,8 +4,8 @@ mod database;
 mod handler;
 mod routes;
 
-use routes::create_router;
 use database::connect;
+use routes::create_router;
 use std::sync::Arc;
 // use axum::extract::State;
 use dotenv::dotenv;
