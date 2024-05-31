@@ -5,12 +5,22 @@ mod handler;
 mod routes;
 
 use routes::create_router;
+use database::connect;
+use std::sync::Arc;
+// use axum::extract::State;
+use dotenv::dotenv;
 
 /// This function is marked as `#[tokio::main]` to enable async execution using the Tokio runtime.
 #[tokio::main]
 async fn main() {
-    // Creating router
-    let app = create_router();
+    dotenv().ok(); // Load environment variables from .env file
+
+    // Create the connection pool
+    let pool = connect().await;
+    let pool = Arc::new(pool);
+
+    // Create the router with the connection pool as state
+    let app = create_router(pool.clone());
 
     println!("Server started successfully at localhost:8000");
 
