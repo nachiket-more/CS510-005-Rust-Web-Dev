@@ -64,6 +64,8 @@ pub async fn get_question_by_id_handler(
         .fetch_optional(&*pool)
         .await;
 
+    // If the question is found, return it as a JSON response
+    // Otherwise, return a Not Found error
     match result {
         Ok(Some(question)) => Json(question).into_response(),
         Ok(None) => (
