@@ -194,6 +194,30 @@ pub async fn insert_question_handler(
 //         }
 //     }
 // }
+pub async fn delete_question_handler(
+    State(pool): State<Arc<PgPool>>,
+    Path(id): Path<i32>,
+) -> impl IntoResponse {
+    // Execute the SQL query to delete the question by id
+    let result = sqlx::query!("DELETE FROM questions WHERE id = $1", id)
+        .execute(&*pool)
+        .await;
+
+    match result {
+        Ok(res) if res.rows_affected() > 0 => {
+            let json_response = serde_json::json!({ "message": "Question deleted successfully" });
+            (StatusCode::OK, Json(json_response))
+        }
+        Ok(_) => {
+            let json_response = serde_json::json!({ "error": "Question not found" });
+            (StatusCode::NOT_FOUND, Json(json_response))
+        }
+        Err(_) => {
+            let json_response = serde_json::json!({ "error": "Failed to delete question" });
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(json_response))
+        }
+    }
+}
 
 // /// Update a question handler.
 // /// This function updates an existing question in the database based on the provided payload.
