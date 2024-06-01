@@ -265,3 +265,77 @@ pub async fn delete_question_handler(
 //         }
 //     }
 // }
+pub async fn update_question_handler(
+    State(pool): State<Arc<PgPool>>,
+    Path(id): Path<i32>,
+    Json(payload): Json<Value>,
+) -> impl IntoResponse {
+    let mut updates = vec![];
+    let mut values: Vec<(usize, &str)> = vec![];
+    let mut index = 2;
+
+    if let Some(title) = payload.get("title").and_then(|v| v.as_str()) {
+        updates.push(format!("title = ${}", index));
+        values.push((index, title));
+        index += 1;
+    }
+
+    if let Some(content) = payload.get("content").and_then(|v| v.as_str()) {
+        updates.push(format!("content = ${}", index));
+        values.push((index, content));
+        index += 1;
+    }
+
+    let tags_joined;
+    if let Some(tags) = payload.get("tags").and_then(|v| v.as_array()) {
+        let tags: Vec<String> = tags
+            .iter()
+            .filter_map(|tag| tag.as_str().map(String::from))
+            .collect();
+        tags_joined = tags.join(",");
+        updates.push(format!("tags = ${}", index));
+        values.push((index, &tags_joined));
+    }
+
+    if updates.is_empty() {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({ "error": "No valid fields to update" })),
+        );
+    }
+
+    let query = format!(
+        "UPDATE questions SET {} WHERE id = $1 RETURNING id, title, content, tags",
+        updates.join(", ")
+    );
+
+    let mut sql_query = sqlx::query_as::<_, crate::database::models::Question>(&query).bind(id);
+
+    for (_i, value) in values {
+        sql_query = sql_query.bind(value);
+    }
+
+    let result = sql_query.fetch_one(&*pool).await;
+
+    match result {
+        Ok(updated_question) => {
+            let json_response = serde_json::json!({
+                "message": "Question updated successfully",
+                "updated_question": updated_question
+            });
+            (StatusCode::OK, Json(json_response))
+        }
+        Err(sqlx::Error::RowNotFound) => {
+            let json_response = serde_json::json!({
+                "error": "Question not found"
+            });
+            (StatusCode::NOT_FOUND, Json(json_response))
+        }
+        Err(_) => {
+            let json_response = serde_json::json!({
+                "error": "Failed to update question"
+            });
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(json_response))
+        }
+    }
+}

@@ -16,8 +16,7 @@ async fn main() {
     dotenv().ok(); // Load environment variables from .env file
 
     // Create the connection pool
-    let pool = connect().await;
-    let pool = Arc::new(pool);
+    let pool = Arc::new(connect().await);
 
     // Create the router with the connection pool as state
     let app = create_router(pool.clone());
