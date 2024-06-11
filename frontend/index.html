@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Questions</title>
+    <link rel="stylesheet" href="index.css" />
 </head>
 <body>
     <h1>Questions</h1>
@@ -16,7 +15,11 @@
                 const questionList = document.getElementById('question-list');
                 questions.forEach(question => {
                     const li = document.createElement('li');
-                    li.textContent = `Title: ${question.title}, Tags: ${question.tags.join(', ')}, Content: ${question.content}`;
+                    li.innerHTML = `
+                        <div class="title">Title: ${question.title}</div>
+                        <div class="tags">Tags: ${question.tags.join(', ')}</div>
+                        <div class="content">Content: ${question.content}</div>
+                    `;
                     questionList.appendChild(li);
                 });
             })
