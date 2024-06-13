@@ -4,9 +4,9 @@
 This is the repo for homeworks for TOP: Rust Web Development Spring 2024
 
 
-## Homework - Persistent Data
+## Homework - Rust REST Front End
 
-This is a CRUD API built using Rust and the Axum web framework for questions with Postgress database connection for Persistent Data.
+This is a Rust web app with CRUD API built using Rust and the Axum web framework for questions with Postgress database connection for Persistent Data.
 
 ## Features
 - Retrieve a list of all questions in the database
@@ -21,6 +21,9 @@ This is a CRUD API built using Rust and the Axum web framework for questions wit
 - handler.rs: Implements the logic for handling the API requests
 - database.rs: Manages the database of questions, including seeding the database
 - .env: Contains database url for conenction to the postgress instance
+- index.html: The main HTML file for the frontend.
+- index.css: The CSS file for styling the frontend.
+- main.js: The JavaScript file for frontend logic and API interactions.
 
 ## Features
 ### Prerequisites
